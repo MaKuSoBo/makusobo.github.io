@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1f6f5c">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Rodinné úlohy</title>
+<style>
+:root{--bg:#f4f6f4;--surface:#fff;--text:#1d2420;--muted:#59645e;--accent:#1f6f5c;--accent-text:#fff;--danger:#b3261e;--border:#cfd6d2;--on-danger:#fff;--warn-bg:#fff3cd;--warn-text:#5c4400;--unread:#e3f3ee}
+@media (prefers-color-scheme:dark){:root{--bg:#121614;--surface:#1c211e;--text:#e7ece9;--muted:#a2aea7;--accent:#5cc4a8;--accent-text:#0b1f19;--danger:#ff8a80;--on-danger:#1a0505;--border:#34403a;--warn-bg:#4a3b00;--warn-text:#ffe9a6;--unread:#1d3a32}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--accent);color:var(--accent-text);display:flex;justify-content:space-between;align-items:center;padding:10px 16px;gap:8px}
+header h1{font-size:18px;margin:0}
+header span{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+main{max-width:640px;margin:0 auto;padding:16px 16px 150px}
+.banner{padding:10px 16px;background:var(--warn-bg);color:var(--warn-text);font-size:14px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.center{max-width:420px;margin:0 auto;padding:48px 16px;text-align:center}
+.btn{min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn:disabled{opacity:.5;cursor:default}
+.link{min-height:44px;padding:0 8px;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:14px}
+.seg{display:flex;gap:8px;margin-bottom:12px}
+.seg .btn{flex:1}
+.seg .btn[aria-pressed=true]{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+ul.list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px;display:flex;gap:10px;align-items:flex-start}
+.card.unread{background:var(--unread)}
+.check{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);background:none;color:var(--accent);font-size:22px;cursor:pointer}
+.check.done{background:var(--accent);color:var(--accent-text)}
+.body{flex:1;min-width:0}
+.title{font-weight:600;overflow-wrap:anywhere}
+.desc{font-size:14px;overflow-wrap:anywhere;white-space:pre-wrap}
+.meta{font-size:13px;color:var(--muted)}
+.thumb{display:block;margin-top:6px;min-width:44px;min-height:44px;padding:0;border:1px solid var(--border);border-radius:8px;background:var(--bg);overflow:hidden;cursor:pointer}
+.thumb img{display:block;max-width:120px;max-height:120px}
+.fab{position:fixed;right:16px;bottom:76px;width:56px;height:56px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-text);font-size:30px;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer;z-index:6}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:7;display:flex;background:var(--surface);border-top:1px solid var(--border)}
+nav button{flex:1;min-height:56px;border:0;background:none;font-size:12px;cursor:pointer;position:relative}
+nav button[aria-current=page]{color:var(--accent);font-weight:700;box-shadow:inset 0 3px 0 var(--accent)}
+.badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--danger);color:var(--on-danger);font-size:11px;margin-left:2px}
+.empty{text-align:center;color:var(--muted);padding:32px 0}
+.ov{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:600px){.ov{align-items:center}}
+.dlg{background:var(--surface);width:100%;max-width:440px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px}
+@media (min-width:600px){.dlg{border-radius:16px}}
+.dlg h2{margin:0 0 8px;font-size:18px}
+.dlg .actions{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+label{display:block;margin:8px 0;font-size:14px}
+input[type=text],input[type=email],textarea,select{display:block;width:100%;min-height:44px;margin-top:4px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
+.err,.merr{color:var(--danger);font-size:14px;min-height:0}
+.preview{display:block;max-width:100%;max-height:40vh;margin:8px auto;border-radius:8px}
+.toast{position:fixed;left:16px;right:16px;top:64px;z-index:30;max-width:420px;margin:0 auto;padding:10px 14px;background:var(--text);color:var(--bg);border-radius:10px;text-align:center}
+.viewer{position:fixed;inset:0;z-index:25;background:#000;display:flex;align-items:center;justify-content:center;color:#fff}
+.viewer img{max-width:100%;max-height:100%}
+.viewer button{position:absolute;top:8px;right:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+h2.sec{font-size:16px;margin:20px 0 8px}
+#dbg{position:fixed;left:0;right:0;bottom:56px;z-index:8;background:var(--surface);border-top:2px dashed var(--danger);font-size:13px;max-height:50vh;overflow:auto;padding:4px 8px}
+#dbg .btn{min-height:44px;font-size:13px;margin:2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+
+/* ======================================================================
+   KONFIGURÁCIA: jediné miesto, ktoré sa mení pri prepnutí na reálny server.
+   Mock:        const BACKEND = { type: 'mock' };
+   Reálny:      const BACKEND = { type: 'apps_script', url: 'https://script.google.com/macros/s/.../exec' };
+   ====================================================================== */
+const BACKEND = { type: 'apps_script', url: 'https://script.google.com/macros/s/AKfycbyDuKQye7OSzA4XR0wCOXA5P-__NCyp5a7_pVQWsCl0za7g-I1t9-iqPkzVBMSILV88Yw/exec' };
+
+/* ======================================================================
+   MOCK BACKEND (localStorage 'mock_db_v1', fotky v IndexedDB).
+   Rovnaké pravidlá a kódy chýb ako 03_Code.gs. Používa ho len adaptér 'mock'.
+   Ladenie: ?debug=1  ?latency=<ms>  ?poll=<s>
+   ====================================================================== */
+const Mock = (function () {
+  const KEY = 'mock_db_v1', DAY = 864e5, TRASH_DAYS = 30, INVITE_DAYS = 7;
+  const Q = new URLSearchParams(location.search);
+  let netOff = false, db;
+  const fresh = () => ({ members: [], invites: [], tasks: [], events: [], event_reads: [], outbox: [], seq: 0, clock: 0, flags: { failUpload: false, mailQuota: false } });
+  /* DB je v IndexedDB (konzistentné medzi kartami, BUG-02); localStorage 'mock_db_v1' je zrkadlo a kontrola poškodenia (BUG-05). */
+  async function load() {
+    let ls = null; try { ls = localStorage.getItem(KEY); } catch (e) { /* nič */ }
+    if (ls !== null) { try { const o = JSON.parse(ls); if (!o || !Array.isArray(o.members)) throw 0; } catch (e) { throw E('INTERNAL', 'Poškodené dáta mocku.'); } }
+    let s = await idbGet('db', 'mock_db_idb', 'd'); if (s == null) s = ls;
+    db = s ? JSON.parse(s) : fresh(); return db;
+  }
+  async function save() { const s = JSON.stringify(db); await idbPut('db', s, 'mock_db_idb', 'd'); try { localStorage.setItem(KEY, s); } catch (e) { /* nič */ } }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const nowIso = () => new Date(Date.now() + db.clock).toISOString();
+  const rnd = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
+  const newToken = () => rnd().replace(/-/g, '') + rnd().replace(/-/g, '');
+  async function sha(t) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''); }
+  const E = (code, message) => ({ code, message });
+  const withLock = fn => navigator.locks ? navigator.locks.request('mock_db_lock', fn) : fn();
+
+  function idbDo(mode, fn, name = 'mock_photos_v1', store = 'p') {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(name, 1);
+      r.onupgradeneeded = () => r.result.createObjectStore(store);
+      r.onerror = () => rej(r.error);
+      r.onsuccess = () => {
+        const d = r.result, tx = d.transaction(store, mode), req = fn(tx.objectStore(store));
+        tx.oncomplete = () => { d.close(); res(req && req.result); };
+        tx.onerror = () => rej(tx.error);
+      };
+    });
+  }
+  const idbPut = (k, v, n, st) => idbDo('readwrite', s => s.put(v, k), n, st);
+  const idbGet = (k, n, st) => idbDo('readonly', s => s.get(k), n, st);
+  const idbDel = k => idbDo('readwrite', s => s.delete(k));
+  const idbClear = async () => { await idbDo('readwrite', s => s.clear()); await idbDo('readwrite', s => s.clear(), 'mock_db_idb', 'd'); };
+
+  const act = (list, f) => list.filter(f);
+  const pubMember = (m, withEmail) => { const o = { id: m.id, name: m.name, role: m.role, active: !!m.active }; if (withEmail) o.email = m.email; return o; };
+  const pubTask = t => ({ id: t.id, title: t.title, description: t.description, status: t.status, created_by: t.created_by, created_at: t.created_at, done_by: t.done_by || null, done_at: t.done_at || null, has_photo: !!t.photo_file_id, deleted_at: t.deleted_at || null, updated_at: t.updated_at });
+  const validEmail = e => typeof e === 'string' && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e) && e.length <= 120;
+  const adminCount = () => db.members.filter(x => x.active && x.role === 'admin').length;
+  const requireAdmin = me => { if (me.role !== 'admin') throw E('FORBIDDEN', 'Len správca.'); };
+  const addEvent = (type, t, actor) => db.events.push({ id: String(++db.seq).padStart(10, '0'), task_id: t.id, type, actor: actor.id, task_title: t.title, created_at: nowIso() });
+  function task(id) { const t = db.tasks.find(x => x.id === id); if (!t) throw E('NOT_FOUND', 'Úloha neexistuje.'); return t; }
+  function mailStatus() { return db.flags.mailQuota ? 'QUOTA_EXHAUSTED' : 'OK'; }
+
+  async function auth(token) {
+    if (!token) throw E('UNAUTHORIZED', 'Neplatný prístup.');
+    const h = await sha(token), m = db.members.find(x => x.token_hash === h);
+    if (!m) throw E('UNAUTHORIZED', 'Neplatný prístup.');
+    if (!m.active) throw E('REVOKED', 'Prístup bol zrušený.');
+    return m;
+  }
+  async function makeInvite(by, inv) {
+    const token = newToken(), exp = new Date(Date.now() + db.clock + INVITE_DAYS * DAY).toISOString();
+    db.invites.push(Object.assign({ id: rnd(), token_hash: await sha(token), created_by: by, expires_at: exp, used_at: '' }, inv));
+    return { inviteToken: token, expiresAt: exp };
+  }
+  async function join(p) {
+    const h = await sha(String(p.inviteToken || '')), inv = db.invites.find(x => x.token_hash === h);
+    if (!inv || inv.used_at || new Date(inv.expires_at).getTime() < Date.now() + db.clock) throw E('INVALID_INVITE', 'Pozvánka už neplatí.');
+    const token = newToken(); let m;
+    if (inv.member_id) {
+      m = db.members.find(x => x.id === inv.member_id);
+      if (!m || !m.active) throw E('INVALID_INVITE', 'Pozvánka už neplatí.');
+      m.token_hash = await sha(token);
+    } else {
+      m = { id: rnd(), name: inv.name, email: inv.email, role: inv.role, active: true, token_hash: await sha(token), created_at: nowIso(), removed_at: '' };
+      db.members.push(m);
+    }
+    inv.used_at = nowIso();
+    return { token, member: pubMember(m, true) };
+  }
+  async function purge(days) {
+    const limit = Date.now() + db.clock - days * DAY; let n = 0;
+    for (const t of db.tasks.slice()) {
+      if (t.deleted_at && new Date(t.deleted_at).getTime() <= limit) {
+        for (const k of [t.photo_file_id, t.thumb_file_id]) if (k) await idbDel(k);
+        db.tasks.splice(db.tasks.indexOf(t), 1); n++;
+      }
+    }
+    return { purged: n };
+  }
+  function checkImg(du) {
+    const m = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(du || '');
+    if (!m) throw E('VALIDATION', 'Súbor nie je obrázok.');
+    if (m[2].length * 0.75 > 5 * 1024 * 1024) throw E('VALIDATION', 'Fotka je príliš veľká.');
+  }
+  async function dispatch(action, token, p) {
+    if (action === 'join') return join(p);
+    if (action === 'inviteInfo') {
+      const h = await sha(String(p.inviteToken || '')), inv = db.invites.find(x => x.token_hash === h);
+      if (!inv || inv.used_at || new Date(inv.expires_at).getTime() < Date.now() + db.clock) throw E('INVALID_INVITE', 'Pozvánka už neplatí.');
+      return { name: inv.name };
+    }
+    const me = await auth(token);
+    switch (action) {
+      case 'getState': {
+        const events = db.events.slice(-50).reverse();
+        const rd = db.event_reads.find(x => x.member_id === me.id), last = rd ? rd.last_read_event_id : '';
+        return {
+          me: pubMember(me, true), tasks: db.tasks.map(pubTask),
+          members: db.members.map(x => pubMember(x, me.role === 'admin' && x.active)),
+          events, unread: events.filter(e => !last || e.id > last).length, serverTime: nowIso(), mailStatus: mailStatus()
+        };
+      }
+      case 'createTask': {
+        const title = String(p.title || '').trim(), desc = String(p.description || '');
+        if (!title || title.length > 120 || desc.length > 1000) throw E('VALIDATION', 'Neplatný názov alebo popis.');
+        const cid = /^[0-9a-f-]{36}$/i.test(String(p.clientId || '')) ? String(p.clientId) : '';
+        if (cid) { const ex = db.tasks.find(x => x.id === cid); if (ex) return pubTask(ex); }
+        const t = { id: cid || rnd(), title, description: desc, status: 'open', created_by: me.id, created_at: nowIso(), done_by: '', done_at: '', photo_file_id: '', thumb_file_id: '', deleted_at: '', deleted_by: '', updated_at: nowIso() };
+        db.tasks.push(t); addEvent('created', t, me); return pubTask(t);
+      }
+      case 'completeTask': {
+        const t = task(p.id);
+        if (t.deleted_at) throw E('NOT_FOUND', 'Úloha neexistuje.');
+        if (t.status === 'done') { const w = db.members.find(x => x.id === t.done_by); throw E('ALREADY_DONE', 'Už splnil ' + (w ? w.name : 'iný člen') + '.'); }
+        if (p.photo) {
+          if (t.photo_file_id) throw E('PHOTO_IMMUTABLE', 'Fotku už nemožno pridať ani zmeniť.');
+          checkImg(p.photo); if (p.thumb) checkImg(p.thumb);
+          if (db.flags.failUpload) throw E('INTERNAL', 'Nahranie fotky zlyhalo.');
+          await idbPut(t.id, p.photo); t.photo_file_id = t.id;
+          if (p.thumb) { await idbPut(t.id + '_t', p.thumb); t.thumb_file_id = t.id + '_t'; }
+        } else if (p.thumb) throw E('VALIDATION', 'Miniatúra bez fotky.');
+        t.status = 'done'; t.done_by = me.id; t.done_at = nowIso(); t.updated_at = nowIso();
+        addEvent('done', t, me);
+        if (!db.flags.mailQuota) act(db.members, x => x.active && x.email).forEach(m => db.outbox.push({ to: m.email, subject: 'Splnené: ' + t.title, text: me.name + ' splnil/a úlohu: ' + t.title, at: nowIso() }));
+        return pubTask(t);
+      }
+      case 'reopenTask': {
+        const t = task(p.id);
+        if (t.deleted_at) throw E('NOT_FOUND', 'Úloha neexistuje.');
+        if (t.status !== 'done') throw E('NOT_DONE', 'Úloha nie je splnená.');
+        t.status = 'open'; t.done_by = ''; t.done_at = ''; t.updated_at = nowIso();
+        addEvent('reopened', t, me); return pubTask(t);
+      }
+      case 'deleteTask': {
+        const t = task(p.id); if (t.deleted_at) return pubTask(t);
+        t.deleted_at = nowIso(); t.deleted_by = me.id; t.updated_at = nowIso(); addEvent('deleted', t, me); return pubTask(t);
+      }
+      case 'restoreTask': {
+        const t = task(p.id); if (!t.deleted_at) throw E('NOT_FOUND', 'Úloha nie je v koši.');
+        t.deleted_at = ''; t.deleted_by = ''; t.updated_at = nowIso(); addEvent('restored', t, me); return pubTask(t);
+      }
+      case 'emptyTrash': requireAdmin(me); return purge(0);
+      case 'getPhoto': {
+        const t = task(p.id), k = p.kind === 'thumb' ? (t.thumb_file_id || t.photo_file_id) : t.photo_file_id;
+        if (!k) throw E('NOT_FOUND', 'Fotka neexistuje.');
+        const dataUrl = await idbGet(k); if (!dataUrl) throw E('NOT_FOUND', 'Fotka neexistuje.');
+        return { dataUrl };
+      }
+      case 'markEventsRead': {
+        const lastId = db.events.length ? db.events[db.events.length - 1].id : '';
+        const rd = db.event_reads.find(x => x.member_id === me.id);
+        if (rd) rd.last_read_event_id = lastId; else db.event_reads.push({ member_id: me.id, last_read_event_id: lastId });
+        return {};
+      }
+      case 'createInvite': {
+        requireAdmin(me);
+        if (p.memberId) {
+          const m = db.members.find(x => x.id === p.memberId && x.active);
+          if (!m) throw E('NOT_FOUND', 'Člen neexistuje.');
+          return makeInvite(me.id, { name: m.name, email: m.email, role: m.role, member_id: m.id });
+        }
+        if (!p.name || !String(p.name).trim() || String(p.name).length > 40) throw E('VALIDATION', 'Meno je povinné (max 40).');
+        if (!validEmail(p.email)) throw E('VALIDATION', 'Zadaj platný e-mail.');
+        if (p.role !== 'admin' && p.role !== 'member') throw E('VALIDATION', 'Neplatná rola.');
+        const em = p.email.toLowerCase();
+        if (db.members.some(x => x.active && String(x.email).toLowerCase() === em)) throw E('EMAIL_EXISTS', 'E-mail už existuje.');
+        if (db.invites.some(x => !x.used_at && !x.member_id && String(x.email).toLowerCase() === em && new Date(x.expires_at).getTime() > Date.now() + db.clock)) throw E('EMAIL_EXISTS', 'Na tento e-mail už existuje nevyužitá pozvánka.');
+        return makeInvite(me.id, { name: p.name, email: em, role: p.role, member_id: '' });
+      }
+      case 'updateMember': {
+        requireAdmin(me);
+        const m = db.members.find(x => x.id === p.id && x.active);
+        if (!m) throw E('NOT_FOUND', 'Člen neexistuje.');
+        if (p.name !== undefined) { if (!p.name || !String(p.name).trim() || String(p.name).length > 40) throw E('VALIDATION', 'Neplatné meno.'); m.name = p.name; }
+        if (p.email !== undefined) {
+          if (!validEmail(p.email)) throw E('VALIDATION', 'Zadaj platný e-mail.');
+          const em = p.email.toLowerCase();
+          if (db.members.some(x => x.id !== m.id && x.active && String(x.email).toLowerCase() === em)) throw E('EMAIL_EXISTS', 'E-mail už existuje.');
+          m.email = em;
+        }
+        if (p.role !== undefined) {
+          if (p.role !== 'admin' && p.role !== 'member') throw E('VALIDATION', 'Neplatná rola.');
+          if (m.role === 'admin' && p.role !== 'admin' && adminCount() <= 1) throw E('LAST_ADMIN', 'Musí ostať aspoň jeden správca.');
+          m.role = p.role;
+        }
+        return pubMember(m, true);
+      }
+      case 'removeMember': {
+        requireAdmin(me);
+        const m = db.members.find(x => x.id === p.id && x.active);
+        if (!m) throw E('NOT_FOUND', 'Člen neexistuje.');
+        if (m.role === 'admin' && adminCount() <= 1) throw E('LAST_ADMIN', 'Musí ostať aspoň jeden správca.');
+        m.active = false; m.removed_at = nowIso(); return {}; // token_hash ostáva, aby volanie vrátilo REVOKED (AC15)
+      }
+      case 'exportBackup': requireAdmin(me); return { exportedAt: nowIso(), tasks: db.tasks.map(pubTask), events: db.events, members: db.members.map(m => pubMember(m, true)) };
+      default: throw E('VALIDATION', 'Neznáma akcia.');
+    }
+  }
+  async function handle(action, token, payload) {
+    const lat = Q.has('latency') ? Number(Q.get('latency')) || 0 : 300 + Math.random() * 900;
+    await sleep(lat);
+    if (netOff) throw new Error('offline');
+    return withLock(async () => {
+      try { await load(); const data = await dispatch(action, token, payload); await save(); return { ok: true, data }; }
+      catch (e) { if (e && e.code) return { ok: false, code: e.code, message: e.message }; console.error(e); return { ok: false, code: 'INTERNAL', message: 'Chyba servera.' }; }
+    });
+  }
+  /* ladiaci panel */
+  const admin = {
+    state: () => withLock(async () => (await load(), { netOff, flags: db.flags })),
+    outbox: () => withLock(async () => (await load(), db.outbox)),
+    hasPhoto: k => idbGet(k).then(v => !!v),
+    setFlag: (k, v) => withLock(async () => { await load(); db.flags[k] = v; await save(); }),
+    setNet: v => { netOff = v; },
+    advance: () => withLock(async () => { await load(); db.clock += 31 * DAY; await purge(TRASH_DAYS); await save(); }),
+    reset: () => withLock(async () => { try { localStorage.removeItem(KEY); } catch (e) { /* nič */ } await idbClear(); }),
+    firstInvite: () => withLock(async () => { await load(); const r = await makeInvite('setup', { name: 'Správca', email: 'admin@example.local', role: 'admin', member_id: '' }); await save(); return r.inviteToken; })
+  };
+  return { handle, admin };
+})();
+window.MockBackend = Mock;
+
+/* ======================================================================
+   BACKEND ADAPTER: jediné miesto s fetch/úložiskom pre dáta a token.
+   backend.call(action, payload) -> {ok:true,data} | {ok:false,code,message}
+   Pri chybe siete vracia code 'NETWORK'.
+   ====================================================================== */
+const backend = (function () {
+  const TK = 'family_token', area = BACKEND.type === 'mock' ? 'sessionStorage' : 'localStorage';
+  let mem = null, storageOk = true;
+  try { const s = window[area]; s.setItem('_t', '1'); s.removeItem('_t'); } catch (e) { storageOk = false; }
+  const getToken = () => { try { return window[area].getItem(TK); } catch (e) { return mem; } };
+  const setToken = t => { mem = t; try { window[area].setItem(TK, t); } catch (e) { /* ostane v pamäti */ } };
+  const clearToken = () => { mem = null; try { window[area].removeItem(TK); } catch (e) { /* nič */ } };
+  async function send(action, token, payload) {
+    if (BACKEND.type === 'mock') return Mock.handle(action, token, payload);
+    if (BACKEND.type === 'apps_script') {
+      const r = await fetch(BACKEND.url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action, token, payload }) });
+      return r.json();
+    }
+    throw new Error('Neznámy BACKEND.type');
+  }
+  async function call(action, payload) {
+    try {
+      const r = await send(action, action === 'join' || action === 'inviteInfo' ? undefined : getToken(), payload || {});
+      if (r && r.ok && action === 'join') setToken(r.data.token);
+      return r;
+    } catch (e) { return { ok: false, code: 'NETWORK', message: 'Bez pripojenia, skús znova.' }; }
+  }
+  /* surové volanie s explicitným tokenom (kontraktné testy); sieťová chyba -> code NETWORK */
+  async function raw(action, token, payload) { try { return await send(action, token, payload || {}); } catch (e) { return { ok: false, code: 'NETWORK', message: 'Bez pripojenia, skús znova.' }; } }
+  return { call, raw, getToken, clearToken, storageOk: () => storageOk };
+})();
+
+/* ======================================================================
+   KLIENT (UI). Nepoužíva localStorage ani fetch; len backend.call.
+   ====================================================================== */
+const Q = new URLSearchParams(location.search);
+const IS_MOCK = BACKEND.type === 'mock';
+const POLL_MS = IS_MOCK && Q.has('poll') ? Math.max(1, Number(Q.get('poll')) || 30) * 1000 : 30000;
+const S = { auth: 'none', loaded: false, error: null, view: 'tasks', tab: 'open', me: null, tasks: [], members: [], events: [], unread: 0, bellN: 0, mailStatus: 'OK', offline: !navigator.onLine, skew: 0, lastSync: null };
+let pendingInvite = null, pollTimer = null, inflight = false, lastKey = '';
+
+/* --- pomocné --- */
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in attrs || {}) {
+    const v = attrs[k]; if (v == null || v === false) continue;
+    if (k === 'class') e.className = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) { if (c == null || c === false) continue; e.append(c.nodeType ? c : document.createTextNode(String(c))); }
+  return e;
+}
+const nowMs = () => Date.now() + S.skew;
+const TZ = 'Europe/Bratislava';
+const dtf = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+function parts(ms) { const o = {}; dtf.formatToParts(new Date(ms)).forEach(p => { o[p.type] = p.value; }); return o; }
+function fmtDate(iso) {
+  const ms = Date.parse(iso); if (!iso || isNaN(ms)) return '';
+  const a = parts(ms), n = parts(nowMs()), dn = o => Date.UTC(+o.year, +o.month - 1, +o.day) / 864e5, diff = dn(n) - dn(a), hm = a.hour + ':' + a.minute;
+  if (diff <= 0) return 'dnes ' + hm;
+  if (diff === 1) return 'včera ' + hm;
+  if (diff <= 7) return 'pred ' + diff + ' dňami ' + hm;
+  return +a.day + '. ' + +a.month + '. ' + a.year;
+}
+function fmtDay(iso) { const a = parts(Date.parse(iso)); return +a.day + '. ' + +a.month + '. ' + a.year; }
+const dni = n => n === 1 ? '1 deň' : (n >= 2 && n <= 4 ? n + ' dni' : n + ' dní');
+const isAdmin = () => S.me && S.me.role === 'admin';
+const nameOf = id => { const m = S.members.find(x => x.id === id); return m ? m.name : 'neznámy člen'; };
+const uuid = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+const msgFor = r => r.code === 'NETWORK' ? 'Bez pripojenia, skús znova.' : (r.message || 'Chyba, skús znova.');
+
+let toastEl = null, toastTimer = null;
+function toast(msg) {
+  if (toastEl) toastEl.remove(); clearTimeout(toastTimer);
+  toastEl = h('div', { class: 'toast', role: 'status' }, msg); document.body.append(toastEl);
+  toastTimer = setTimeout(() => { toastEl.remove(); toastEl = null; }, 4000);
+}
+
+/* --- dialógy --- */
+function modal(spec) {
+  const prev = document.activeElement, ov = h('div', { class: 'ov' });
+  let box = null;
+  const ctl = {
+    close() { document.removeEventListener('keydown', onKey); ov.remove(); if (prev && prev.focus) try { prev.focus(); } catch (e) { /* nič */ } },
+    busy(b) { box.querySelectorAll('button').forEach(x => { x.disabled = b; }); },
+    error(m) { const el = box.querySelector('.merr'); if (el) el.textContent = m || ''; },
+    set(s) {
+      box = h('div', { class: 'dlg', role: 'dialog', 'aria-modal': 'true', 'aria-label': s.title },
+        h('h2', {}, s.title), s.body,
+        h('div', { class: 'err merr', role: 'alert' }),
+        h('div', { class: 'actions' }, (s.buttons || []).map(b => h('button', { type: 'button', class: 'btn' + (b.kind ? ' ' + b.kind : ''), onclick: () => b.run(ctl) }, b.label))));
+      ov.replaceChildren(box);
+      const f = box.querySelector('input,textarea,select') || box.querySelector('.btn'); if (f) f.focus();
+    }
+  };
+  const onKey = e => { if (e.key === 'Escape') ctl.close(); };
+  document.addEventListener('keydown', onKey);
+  ctl.set(spec); document.body.append(ov);
+  return ctl;
+}
+const cancelBtn = () => ({ label: 'Zrušiť', run: c => c.close() });
+/** Potvrdenie; run() vráti odpoveď backendu, pri chybe ostane dialóg s hláškou. */
+function confirmAction(o) {
+  modal({
+    title: o.title, body: h('p', {}, o.text),
+    buttons: [{
+      label: o.ok, kind: o.danger ? 'danger' : 'primary', run: async c => {
+        c.busy(true); c.error(''); const r = await o.run();
+        if (r.ok) { c.close(); if (o.done) o.done(r); } else { c.busy(false); c.error(msgFor(r)); if (r.code === 'NOT_FOUND' || r.code === 'NOT_DONE' || r.code === 'ALREADY_DONE') refresh(); }
+      }
+    }, cancelBtn()]
+  });
+}
+
+/* --- API a stav --- */
+async function api(action, payload) {
+  const r = await backend.call(action, payload);
+  if (!r.ok && r.code === 'NETWORK') setOffline(true);
+  else if (!r.ok && (r.code === 'UNAUTHORIZED' || r.code === 'REVOKED')) authLost(r.code);
+  else if (S.offline && r.ok) setOffline(false);
+  return r;
+}
+function setOffline(v) { if (S.offline !== v) { S.offline = v; if (S.auth === 'ok') render(); } }
+function authLost(code) {
+  clearInterval(pollTimer); backend.clearToken(); S.auth = code === 'REVOKED' ? 'revoked' : 'unauth'; S.loaded = false; S.me = null; render();
+}
+function applyTask(t) { const i = S.tasks.findIndex(x => x.id === t.id); if (i >= 0) S.tasks[i] = t; else S.tasks.push(t); render(); }
+async function refresh() {
+  if (inflight || S.auth !== 'ok') return; inflight = true;
+  const r = await api('getState', {}); inflight = false;
+  if (!r.ok) { if (!S.loaded && r.code !== 'UNAUTHORIZED' && r.code !== 'REVOKED') { S.error = msgFor(r); render(); } return; }
+  const d = r.data; S.skew = Date.parse(d.serverTime) - Date.now(); S.lastSync = d.serverTime;
+  Object.assign(S, { me: d.me, tasks: d.tasks, members: d.members, events: d.events, unread: d.unread, mailStatus: d.mailStatus, loaded: true, error: null });
+  if (S.view === 'bell' && S.unread > 0) { S.bellN = S.unread; S.unread = 0; api('markEventsRead', {}); }
+  const key = JSON.stringify([d.me, d.tasks, d.members, d.events, S.unread, d.mailStatus, S.offline]);
+  if (key !== lastKey) { lastKey = key; render(); }
+}
+function start() {
+  S.auth = 'ok'; S.loaded = false; S.error = null; lastKey = ''; render(); refresh();
+  clearInterval(pollTimer); pollTimer = setInterval(() => { if (!document.hidden) refresh(); }, POLL_MS);
+}
+function setView(v) {
+  S.view = v;
+  if (v === 'bell') { S.bellN = S.unread; if (S.unread > 0) { S.unread = 0; api('markEventsRead', {}); } }
+  render(); window.scrollTo(0, 0);
+}
+
+/* --- fotky --- */
+const photoCache = {}, photoPending = {};
+function loadPhoto(id, kind) {
+  const k = id + ':' + kind;
+  if (photoCache[k]) return Promise.resolve(photoCache[k]);
+  if (!photoPending[k]) photoPending[k] = api('getPhoto', { id, kind }).then(r => { delete photoPending[k]; if (r.ok) photoCache[k] = r.data.dataUrl; return r.ok ? r.data.dataUrl : null; });
+  return photoPending[k];
+}
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { io.unobserve(e.target); loadPhoto(e.target.dataset.id, 'thumb').then(u => { if (u) e.target.src = u; }); }
+}), { rootMargin: '200px' });
+async function showFull(id) {
+  const v = h('div', { class: 'viewer', role: 'dialog', 'aria-label': 'Fotka' }, 'Načítavam…', h('button', { class: 'btn', 'aria-label': 'Zavrieť fotku', onclick: () => v.remove() }, 'Zavrieť'));
+  v.addEventListener('click', e => { if (e.target === v || e.target.tagName === 'IMG') v.remove(); });
+  document.body.append(v);
+  const u = await loadPhoto(id, 'full');
+  if (!v.isConnected) return;
+  if (u) { v.firstChild.remove(); v.prepend(h('img', { src: u, alt: 'Fotka k úlohe' })); } else { v.remove(); toast('Fotku sa nepodarilo načítať.'); }
+}
+function loadImg(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); res(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Súbor sa nepodarilo načítať ako obrázok.')); };
+    img.src = url;
+  });
+}
+function toJpeg(img, max) { // prekreslenie cez canvas odstráni EXIF/GPS
+  const w = img.naturalWidth, hh = img.naturalHeight, k = Math.min(1, max / Math.max(w, hh)), c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(hh * k));
+  const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.8);
+}
+async function processImage(file) {
+  if (!file.type || file.type.indexOf('image/') !== 0) throw new Error('Vybraný súbor nie je obrázok.');
+  if (file.size > 15 * 1048576) throw new Error('Fotka je príliš veľká (max 15 MB).');
+  const img = await loadImg(file);
+  return { photo: toJpeg(img, 1600), thumb: toJpeg(img, 240) };
+}
+
+/* --- splnenie úlohy --- */
+async function doComplete(t, po) {
+  const r = await api('completeTask', po ? { id: t.id, photo: po.photo, thumb: po.thumb } : { id: t.id });
+  if (r.ok) { applyTask(r.data); toast('Úloha splnená.'); refresh(); }
+  return r;
+}
+async function attempt(t, po, c) {
+  c.busy(true); c.error('');
+  const r = await doComplete(t, po);
+  if (r.ok) return c.close();
+  if (r.code === 'ALREADY_DONE' || r.code === 'NOT_FOUND') { c.close(); toast(msgFor(r)); refresh(); return; }
+  if (po) {
+    c.set({
+      title: 'Nahranie zlyhalo', body: h('p', {}, 'Úloha zostala nesplnená. ' + msgFor(r)),
+      buttons: [{ label: 'Skúsiť znova', kind: 'primary', run: x => attempt(t, po, x) }, { label: 'Splniť bez fotky', run: x => attempt(t, null, x) }, cancelBtn()]
+    });
+  } else { c.busy(false); c.error(msgFor(r)); }
+}
+function completeFlow(t) {
+  if (t.has_photo) {
+    return confirmAction({ title: 'Splniť úlohu?', text: 'Fotka z predchádzajúceho splnenia ostáva priložená; nová sa už nepridáva.', ok: 'Splniť', run: () => doComplete(t, null) });
+  }
+  const mk = cap => h('input', { type: 'file', accept: 'image/*', capture: cap ? 'environment' : null, hidden: true, onchange: ev => pick(ev.target.files[0]) });
+  let ctl;
+  async function pick(file) {
+    if (!file) return;
+    ctl.busy(true); ctl.error('');
+    try { const po = await processImage(file); ctl.close(); preview(po); } catch (e) { ctl.busy(false); ctl.error(e.message); }
+  }
+  function preview(po) {
+    modal({
+      title: 'Náhľad fotky', body: [h('img', { class: 'preview', src: po.photo, alt: 'Náhľad fotky' }), h('p', {}, 'Fotku už po splnení nebude možné zmeniť ani zmazať.')],
+      buttons: [{ label: 'Potvrdiť a splniť', kind: 'primary', run: c => attempt(t, po, c) }, { label: 'Vybrať inú', run: c => { c.close(); completeFlow(t); } }, cancelBtn()]
+    });
+  }
+  const cam = mk(true), gal = mk(false);
+  ctl = modal({
+    title: 'Splniť úlohu?', body: [h('p', {}, '„' + t.title + '“'), h('p', {}, 'Chceš pridať fotku?'), cam, gal],
+    buttons: [{ label: 'Odfotiť', kind: 'primary', run: () => cam.click() }, { label: 'Z galérie', run: () => gal.click() },
+      { label: 'Bez fotky', run: c => attempt(t, null, c) }, cancelBtn()]
+  });
+}
+
+/* --- ostatné akcie --- */
+function addTaskDlg() {
+  const cid = uuid(), ti = h('input', { type: 'text', maxlength: 120, autocomplete: 'off' }), de = h('textarea', { maxlength: 1000, rows: 3 }), fe = h('div', { class: 'err' });
+  modal({
+    title: 'Nová úloha', body: [h('label', {}, 'Názov', ti, fe), h('label', {}, 'Popis (nepovinné)', de)],
+    buttons: [{
+      label: 'Uložiť', kind: 'primary', run: async c => {
+        fe.textContent = ''; if (!ti.value.trim()) { fe.textContent = 'Zadaj názov úlohy.'; ti.focus(); return; }
+        c.busy(true); c.error(''); const r = await api('createTask', { title: ti.value.trim(), description: de.value, clientId: cid });
+        if (r.ok) { c.close(); applyTask(r.data); refresh(); } else { c.busy(false); c.error(msgFor(r)); }
+      }
+    }, cancelBtn()]
+  });
+}
+function reopenDlg(t) {
+  confirmAction({ title: 'Vrátiť na nesplnenú?', text: t.has_photo ? 'Fotka ostane priložená.' : 'Úloha bude znova otvorená.', ok: 'Vrátiť', run: () => api('reopenTask', { id: t.id }), done: r => { applyTask(r.data); refresh(); } });
+}
+function deleteDlg(t) {
+  confirmAction({ title: 'Presunúť do koša?', text: 'Dá sa obnoviť 30 dní.', ok: 'Presunúť', danger: true, run: () => api('deleteTask', { id: t.id }), done: r => { applyTask(r.data); refresh(); } });
+}
+function inviteResult(r, note) {
+  const link = location.origin + location.pathname + '#invite=' + r.inviteToken, inp = h('input', { type: 'text', readonly: true, value: link, 'aria-label': 'Odkaz pozvánky' });
+  modal({
+    title: 'Pozvánka', body: [h('p', {}, note + ' Odkaz je jednorazový a platí do ' + fmtDay(r.expiresAt) + '.'), inp],
+    buttons: [{
+      label: 'Skopírovať odkaz', kind: 'primary', run: async () => {
+        try { await navigator.clipboard.writeText(link); toast('Odkaz skopírovaný.'); } catch (e) { inp.select(); toast('Označený, skopíruj ho ručne.'); }
+      }
+    }, { label: 'Hotovo', run: c => c.close() }]
+  });
+}
+function inviteDlg() {
+  const nm = h('input', { type: 'text', maxlength: 40 }), em = h('input', { type: 'email', maxlength: 120 }), rl = h('select', {}, h('option', { value: 'member' }, 'Člen'), h('option', { value: 'admin' }, 'Správca'));
+  const ne = h('div', { class: 'err' }), ee = h('div', { class: 'err' });
+  modal({
+    title: 'Pozvať člena', body: [h('label', {}, 'Meno', nm, ne), h('label', {}, 'E-mail (povinný)', em, ee), h('label', {}, 'Rola', rl)],
+    buttons: [{
+      label: 'Vytvoriť pozvánku', kind: 'primary', run: async c => {
+        ne.textContent = ee.textContent = ''; let bad = false;
+        if (!nm.value.trim()) { ne.textContent = 'Zadaj meno.'; bad = true; }
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em.value.trim())) { ee.textContent = 'Zadaj platný e-mail.'; bad = true; }
+        if (bad) return;
+        c.busy(true); c.error(''); const r = await api('createInvite', { name: nm.value.trim(), email: em.value.trim(), role: rl.value });
+        if (r.ok) { c.close(); inviteResult(r.data, 'Pošli odkaz členovi.'); }
+        else { c.busy(false); if (r.code === 'EMAIL_EXISTS') ee.textContent = r.message; else c.error(msgFor(r)); }
+      }
+    }, cancelBtn()]
+  });
+}
+function editMemberDlg(m) {
+  const nm = h('input', { type: 'text', maxlength: 40, value: m.name }), em = h('input', { type: 'email', maxlength: 120, value: m.email || '' });
+  const rl = h('select', {}, h('option', { value: 'member' }, 'Člen'), h('option', { value: 'admin' }, 'Správca')); rl.value = m.role;
+  const ne = h('div', { class: 'err' }), ee = h('div', { class: 'err' });
+  modal({
+    title: 'Upraviť člena', body: [h('label', {}, 'Meno', nm, ne), h('label', {}, 'E-mail (povinný)', em, ee), h('label', {}, 'Rola', rl)],
+    buttons: [{
+      label: 'Uložiť', kind: 'primary', run: async c => {
+        ne.textContent = ee.textContent = ''; let bad = false; const p = { id: m.id };
+        if (!nm.value.trim()) { ne.textContent = 'Zadaj meno.'; bad = true; }
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em.value.trim())) { ee.textContent = 'Zadaj platný e-mail.'; bad = true; }
+        if (bad) return;
+        if (nm.value.trim() !== m.name) p.name = nm.value.trim();
+        if (em.value.trim() !== m.email) p.email = em.value.trim();
+        if (rl.value !== m.role) p.role = rl.value;
+        if (Object.keys(p).length === 1) return c.close();
+        c.busy(true); c.error(''); const r = await api('updateMember', p);
+        if (r.ok) { c.close(); refresh(); } else { c.busy(false); if (r.code === 'EMAIL_EXISTS') ee.textContent = r.message; else c.error(msgFor(r)); }
+      }
+    }, cancelBtn()]
+  });
+}
+function removeMemberDlg(m) {
+  confirmAction({ title: 'Odobrať člena?', text: m.name + ' stratí prístup okamžite. Jeho staré záznamy ostanú.', ok: 'Odobrať', danger: true, run: () => api('removeMember', { id: m.id }), done: () => refresh() });
+}
+async function newDevice(m) {
+  const r = await api('createInvite', { memberId: m.id });
+  if (r.ok) inviteResult(r.data, 'Pošli odkaz členovi ' + m.name + '; starý prístup sa po pripojení zruší.'); else toast(msgFor(r));
+}
+function emptyTrashDlg() {
+  confirmAction({ title: 'Vyprázdniť kôš?', text: 'Úlohy v koši sa trvalo zmažú spolu s ich fotkami. Nedá sa vrátiť.', ok: 'Vyprázdniť', danger: true, run: () => api('emptyTrash', {}), done: () => { toast('Kôš vyprázdnený.'); refresh(); } });
+}
+async function restore(t) {
+  const r = await api('restoreTask', { id: t.id });
+  if (r.ok) { applyTask(r.data); toast('Úloha obnovená.'); refresh(); } else { toast(msgFor(r)); refresh(); }
+}
+async function backup() {
+  const r = await api('exportBackup', {});
+  if (!r.ok) return toast(msgFor(r));
+  const d = new Date(nowMs()).toISOString().slice(0, 10);
+  const a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify(r.data, null, 2)], { type: 'application/json' })), download: 'rodina-zaloha-' + d + '.json' });
+  document.body.append(a); a.click(); a.remove();
+}
+
+/* --- obrazovky --- */
+function taskCard(t) {
+  const done = t.status === 'done';
+  const thumb = t.has_photo ? h('button', { class: 'thumb', 'aria-label': 'Otvoriť fotku', onclick: () => showFull(t.id) }, (() => { const i = h('img', { alt: 'Miniatúra fotky', 'data-id': t.id }); io.observe(i); return i; })()) : null;
+  return h('li', { class: 'card' },
+    h('button', { class: 'check' + (done ? ' done' : ''), 'aria-label': (done ? 'Vrátiť na nesplnenú: ' : 'Splniť úlohu: ') + t.title, onclick: () => done ? reopenDlg(t) : completeFlow(t) }, done ? '✓' : ''),
+    h('div', { class: 'body' },
+      h('div', { class: 'title' }, t.title), t.description ? h('div', { class: 'desc' }, t.description) : null,
+      h('div', { class: 'meta' }, 'Zadal ' + nameOf(t.created_by) + ', ' + fmtDate(t.created_at)),
+      done ? h('div', { class: 'meta' }, 'Splnil ' + nameOf(t.done_by) + ', ' + fmtDate(t.done_at)) : null, thumb),
+    h('button', { class: 'link', 'aria-label': 'Zmazať úlohu: ' + t.title, onclick: () => deleteDlg(t) }, 'Zmazať'));
+}
+function tasksView() {
+  const live = S.tasks.filter(t => !t.deleted_at), open = live.filter(t => t.status === 'open').sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const done = live.filter(t => t.status === 'done').sort((a, b) => (b.done_at || '').localeCompare(a.done_at || ''));
+  const list = S.tab === 'open' ? open : done;
+  const tab = (k, l, n) => h('button', { class: 'btn', 'aria-pressed': S.tab === k ? 'true' : 'false', onclick: () => { S.tab = k; render(); } }, l + ' (' + n + ')');
+  return [h('div', { class: 'seg' }, tab('open', 'Otvorené', open.length), tab('done', 'Splnené', done.length)),
+    list.length ? h('ul', { class: 'list' }, list.map(taskCard)) : h('div', { class: 'empty' }, S.tab === 'open' ? 'Zatiaľ žiadne úlohy. Pridaj prvú.' : 'Zatiaľ nič splnené.')];
+}
+const VERB = { created: 'pridal/a úlohu', done: 'splnil/a', reopened: 'vrátil/a na nesplnenú', deleted: 'zmazal/a', restored: 'obnovil/a' };
+function bellView() {
+  if (!S.events.length) return h('div', { class: 'empty' }, 'Zatiaľ žiadne udalosti.');
+  return h('ul', { class: 'list' }, S.events.map((e, i) => h('li', { class: 'card' + (i < S.bellN ? ' unread' : '') },
+    h('div', { class: 'body' }, h('div', { class: 'title' }, nameOf(e.actor) + ' ' + (VERB[e.type] || e.type) + ': ' + e.task_title), h('div', { class: 'meta' }, fmtDate(e.created_at))))));
+}
+function membersView() {
+  const out = [isAdmin() ? h('button', { class: 'btn primary', onclick: inviteDlg }, 'Pozvať člena') : null];
+  out.push(h('ul', { class: 'list', style: 'margin-top:12px' }, S.members.filter(m => m.active).map(m => h('li', { class: 'card' },
+    h('div', { class: 'body' }, h('div', { class: 'title' }, m.name + (m.id === S.me.id ? ' (ty)' : '')),
+      h('div', { class: 'meta' }, (m.role === 'admin' ? 'Správca' : 'Člen') + (isAdmin() && m.email ? ', ' + m.email : '')),
+      isAdmin() ? h('div', { class: 'row' },
+        h('button', { class: 'btn', onclick: () => editMemberDlg(m) }, 'Upraviť'),
+        h('button', { class: 'btn', onclick: () => newDevice(m) }, 'Nové zariadenie'),
+        h('button', { class: 'btn danger', onclick: () => removeMemberDlg(m) }, 'Odobrať')) : null)))));
+  return out;
+}
+function trashView() {
+  const tr = S.tasks.filter(t => t.deleted_at).sort((a, b) => b.deleted_at.localeCompare(a.deleted_at));
+  return [isAdmin() && tr.length ? h('button', { class: 'btn danger', onclick: emptyTrashDlg }, 'Vyprázdniť kôš') : null,
+    tr.length ? h('ul', { class: 'list', style: 'margin-top:12px' }, tr.map(t => {
+      const left = Math.max(0, 30 - Math.floor((nowMs() - Date.parse(t.deleted_at)) / 864e5));
+      return h('li', { class: 'card' }, h('div', { class: 'body' }, h('div', { class: 'title' }, t.title),
+        h('div', { class: 'meta' }, 'Zmazané ' + fmtDate(t.deleted_at) + ', zostáva ' + dni(left))),
+        h('button', { class: 'btn', 'aria-label': 'Obnoviť úlohu: ' + t.title, onclick: () => restore(t) }, 'Obnoviť'));
+    })) : h('div', { class: 'empty' }, 'Kôš je prázdny.')];
+}
+function settingsView() {
+  return [h('p', {}, 'Pripojenie: ' + (S.offline ? 'offline' : 'v poriadku') + (IS_MOCK ? ' (skúšobný režim, dáta len v tomto prehliadači)' : '')),
+    h('p', {}, 'Posledná synchronizácia: ' + (S.lastSync ? fmtDate(S.lastSync) : 'zatiaľ nie')),
+    h('p', {}, 'Prihlásený: ' + S.me.name + ', ' + (isAdmin() ? 'správca' : 'člen') + ', ' + S.me.email),
+    isAdmin() ? h('p', {}, 'E-maily: ' + (S.mailStatus === 'OK' ? 'v poriadku' : 'dnes vyčerpané, členovia dostanú upozornenie len v zvončeku')) : null,
+    isAdmin() ? h('button', { class: 'btn primary', onclick: backup }, 'Stiahnuť zálohu') : null,
+    h('button', { class: 'btn', style: 'margin-top:12px', onclick: () => { lastKey = ''; refresh(); toast('Obnovujem…'); } }, 'Obnoviť teraz')];
+}
+function loadInvite() {
+  S.inviteName = null; S.inviteErr = null; render();
+  backend.call('inviteInfo', { inviteToken: pendingInvite }).then(r => {
+    if (r.ok) S.inviteName = r.data.name; else S.inviteErr = r.code === 'INVALID_INVITE' ? 'Pozvánka už neplatí, požiadaj správcu o novú.' : msgFor(r);
+    if (S.auth === 'join') render();
+  });
+}
+function joinScreen() {
+  const msg = h('div', { class: 'err', role: 'alert' }, S.inviteErr || '');
+  const b = h('button', { class: 'btn primary', onclick: async () => {
+    b.disabled = true; msg.textContent = ''; const r = await backend.call('join', { inviteToken: pendingInvite });
+    if (r.ok) { pendingInvite = null; toast('Vitaj, ' + r.data.member.name + '.'); start(); }
+    else { b.disabled = false; msg.textContent = r.code === 'INVALID_INVITE' ? 'Pozvánka už neplatí, požiadaj správcu o novú.' : msgFor(r); }
+  } }, 'Pripojiť sa');
+  const storage = backend.storageOk() ? null : h('p', { class: 'banner' }, 'Prehliadač nepovoľuje ukladanie (súkromné okno?). Pripojenie sa stratí po zatvorení.');
+  if (S.inviteErr) return h('div', { class: 'center' }, h('h1', {}, 'Rodinné úlohy'), msg, S.inviteErr.indexOf('pripojenia') >= 0 ? h('button', { class: 'btn primary', onclick: loadInvite }, 'Skúsiť znova') : null);
+  if (S.inviteName == null) return h('div', { class: 'center' }, h('h1', {}, 'Rodinné úlohy'), h('p', {}, 'Načítavam pozvánku…'));
+  return h('div', { class: 'center' }, h('h1', {}, 'Rodinné úlohy'), h('p', {}, 'Vitaj, ' + S.inviteName + '. Pripojiť sa?'), storage, b, msg);
+}
+function msgScreen() {
+  const t = { none: 'Na pripojenie potrebuješ pozvánku od správcu. Otvor odkaz, ktorý ti poslal.', revoked: 'Prístup bol zrušený.', unauth: 'Prístup už neplatí. Požiadaj správcu o novú pozvánku.' }[S.auth];
+  return h('div', { class: 'center' }, h('h1', {}, 'Rodinné úlohy'), h('p', {}, t), IS_MOCK && S.auth === 'none' ? h('p', { class: 'meta' }, 'Skúšobný režim: pridaj ?debug=1 a vytvor prvú pozvánku správcu.') : null);
+}
+const TABS = [['tasks', 'Úlohy'], ['bell', 'Zvonček'], ['members', 'Členovia'], ['trash', 'Kôš'], ['settings', 'Nastavenia']];
+function render() {
+  const root = document.getElementById('app'), y = window.scrollY;
+  if (S.auth === 'join') return root.replaceChildren(joinScreen());
+  if (S.auth !== 'ok') return root.replaceChildren(msgScreen());
+  if (!S.loaded) return root.replaceChildren(h('div', { class: 'center' }, S.error ? [h('p', {}, S.error), h('button', { class: 'btn primary', onclick: () => { S.error = null; render(); refresh(); } }, 'Skúsiť znova')] : 'Načítavam…'));
+  const views = { tasks: tasksView, bell: bellView, members: membersView, trash: trashView, settings: settingsView };
+  root.replaceChildren(...[
+    h('header', {}, h('h1', {}, 'Rodinné úlohy'), h('span', {}, S.me.name)),
+    S.offline ? h('div', { class: 'banner', role: 'status' }, 'Offline: zmeny sa nemusia uložiť.', h('button', { class: 'btn', onclick: () => { refresh(); } }, 'Skúsiť znova')) : null,
+    isAdmin() && S.mailStatus !== 'OK' ? h('div', { class: 'banner', role: 'status' }, 'E-maily dnes vyčerpané, členovia dostanú upozornenie len v zvončeku.') : null,
+    backend.storageOk() ? null : h('div', { class: 'banner' }, 'Prehliadač nepovoľuje ukladanie (súkromné okno?). Pripojenie sa stratí po zatvorení.'),
+    h('main', {}, views[S.view]()),
+    S.view === 'tasks' ? h('button', { class: 'fab', 'aria-label': 'Pridať úlohu', onclick: addTaskDlg }, '+') : null,
+    h('nav', {}, TABS.map(([k, l]) => h('button', { 'aria-current': S.view === k ? 'page' : null, 'aria-label': k === 'bell' && S.unread ? 'Zvonček, neprečítané: ' + S.unread : l, onclick: () => setView(k) }, l, k === 'bell' && S.unread ? h('span', { class: 'badge' }, S.unread) : null)))].filter(Boolean));
+  window.scrollTo(0, y);
+}
+
+/* --- ladiaci panel (len mock, ?debug=1) --- */
+function initDebug() {
+  let lastInvite = '';
+  const out = h('div', {}), box = h('details', { id: 'dbg' }, h('summary', {}, 'Ladenie (mock)'), out), A = Mock.admin;
+  async function draw() {
+    const st = await A.state(), ob = await A.outbox();
+    const btn = (l, f) => h('button', { class: 'btn', onclick: async () => { await f(); draw(); } }, l);
+    out.replaceChildren(
+      btn('Simulovať +31 dní', async () => { await A.advance(); lastKey = ''; refresh(); }),
+      btn(st.netOff ? 'Zapnúť sieť' : 'Vypnúť sieť', async () => A.setNet(!st.netOff)),
+      btn('Zlyhať nahranie fotky: ' + (st.flags.failUpload ? 'ZAP' : 'vyp'), () => A.setFlag('failUpload', !st.flags.failUpload)),
+      btn('Vyčerpať e-mailovú kvótu: ' + (st.flags.mailQuota ? 'ZAP' : 'vyp'), () => A.setFlag('mailQuota', !st.flags.mailQuota)),
+      btn('Vytvoriť prvú pozvánku správcu', async () => { lastInvite = location.href.split('#')[0].replace(/[?].*$/, '') + '#invite=' + await A.firstInvite(); }),
+      lastInvite ? h('p', { id: 'dbg-invite' }, lastInvite) : null,
+      btn('Vyprázdniť dáta', async () => { if (confirm('Zmazať všetky dáta mocku?')) { await A.reset(); backend.clearToken(); location.href = location.pathname + location.search; } }),
+      h('h2', { class: 'sec' }, 'Odoslané e-maily (' + ob.length + ')'),
+      ob.length ? h('ul', {}, ob.slice().reverse().map(m => h('li', {}, 'Komu: ' + m.to + ' | ' + m.subject + ' | ' + m.text))) : h('p', {}, 'Žiadne.'));
+  }
+  box.addEventListener('toggle', () => { if (box.open) draw(); });
+  document.body.append(box);
+}
+
+/* --- štart --- */
+function readInvite() {
+  const m = /[#&]invite=([^&]+)/.exec(location.hash); if (!m) return false;
+  try { pendingInvite = decodeURIComponent(m[1]); } catch (e) { pendingInvite = m[1]; } history.replaceState(null, '', location.pathname + location.search); return true;
+}
+window.addEventListener('hashchange', () => { if (readInvite()) { clearInterval(pollTimer); S.auth = 'join'; loadInvite(); } });
+window.addEventListener('online', () => { setOffline(false); refresh(); });
+window.addEventListener('offline', () => setOffline(true));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+if (Q.get('contract') === '1') runContractMode();
+else {
+  if (IS_MOCK && Q.get('debug') === '1') initDebug();
+  if (readInvite()) { S.auth = 'join'; loadInvite(); }
+  else if (backend.getToken()) start();
+  else render();
+}
+/* Kontraktné testy: index.html?contract=1 (mock: najprv vymaže dáta mocku; reálny: &admin=<kód pozvánky správcu>) */
+function runContractMode() {
+  const out = h('pre', { id: 'contract-log', style: 'padding:16px;white-space:pre-wrap' }, 'Spúšťam kontraktné testy…\n');
+  document.getElementById('app').replaceChildren(out);
+  window.__contractLines = [];
+  const log = l => { window.__contractLines.push(l); out.append(l + '\n'); };
+  const sc = document.createElement('script'); sc.src = 'contract-tests.js';
+  sc.onerror = () => log('CHYBA: contract-tests.js sa nenačítal');
+  sc.onload = async () => {
+    const env = { send: backend.raw, isMock: IS_MOCK, mock: IS_MOCK ? Mock.admin : null, adminInvite: Q.get('admin'), log };
+    const res = await window.runContractTests(env);
+    window.__contractResult = res; log('HOTOVO: ' + res.passed + ' ok, ' + res.failed + ' zlyhalo, ' + res.skipped + ' preskočené');
+  };
+  document.head.append(sc);
+}
+</script>
+</body>
+</html>
